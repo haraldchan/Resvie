@@ -1,6 +1,6 @@
 <p align="center">
   <div align="center">
-    <img src="icon/icon.png" alt="Logo" width="192" height="192">
+    <img src="public/icon/icon.png" alt="Logo" width="192" height="192">
   </div>
   <h2 align="center" style="font-weight: 600">Reservation Handler</h2>
   
