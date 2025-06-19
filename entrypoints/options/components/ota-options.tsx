@@ -1,0 +1,201 @@
+import { Agents, agentSrcDefault } from '@/models/models'
+
+export default function OtaOptions() {
+	const [agentSrc, setAgentSrc] = createSignal<Agents>(agentSrcDefault)
+	const [addAgent, setAddAgent] = createSignal<boolean>(false)
+
+	function handleAgentSourcesUpdate(e: Event) {
+		const input = e.target as HTMLInputElement
+		const updated = agentSrc().map((item) => {
+			if (item.name === input.name) {
+				return {
+					agent: item.agent,
+					name: item.name,
+					domain: input.value,
+				}
+			} else {
+				return item
+			}
+		})
+
+		setAgentSrc(updated)
+		storage.setItem('local:agentSrc', updated)
+	}
+
+	async function handleAddCustomAgent(isSave: boolean) {
+		if (isSave) {
+			const name = document.getElementById('new-agent-name') as HTMLInputElement
+			const domain = document.getElementById('new-agent-domain') as HTMLInputElement
+			if (name.value === '' || domain.value === '') {
+				setAddAgent(false)
+				return
+			}
+
+			const newAgent = {
+				agent: 'custom-' + domain.value.split('.')[1],
+				domain: domain.value,
+				name: name.value,
+			}
+
+			setAgentSrc([...agentSrc(), newAgent])
+			storage.setItem('local:agentSrc', agentSrc())
+		}
+
+		setAddAgent(false)
+	}
+
+	async function handleCustomAgentDeletion(name: string) {
+		const updated = agentSrc().filter((agent) => agent.name !== name)
+
+		setAgentSrc(updated)
+		storage.setItem('local:agentSrc', agentSrc())
+	}
+
+	onMount(async () => {
+		setAgentSrc((await storage.getItem('local:agentSrc')) ?? agentSrcDefault)
+	})
+
+	return (
+		<>
+			<div class='options-details-section'>
+				<header class='options-header'>
+					<span>平台名称</span>
+					<span>网站地址</span>
+					{/* <span>强制 AI</span> */}
+				</header>
+				<ul class='options-items'>
+					{agentSrc()
+						.filter((item) => !item.agent.includes('custom'))
+						.map((item) => {
+							return (
+								<li class='list-item'>
+									<div>{item.name}</div>
+									<div>
+										<input
+											type='url'
+											name={item.name}
+											value={item.domain}
+											style='margin-left:20px;'
+											onchange={handleAgentSourcesUpdate}
+										/>
+									</div>
+								</li>
+							)
+						})}
+				</ul>
+			</div>
+{/* 
+			<h1 style='margin-top:30px'>自定义平台</h1>
+			<p>此部分将由大模型解析</p>
+			<div class='options-details-section'>
+				<header class='options-header'>
+					<span>平台名称</span>
+					<span>网站地址</span>
+
+				</header>
+				<ul class='options-items'>
+					{agentSrc()
+						.filter((item) => item.agent.includes('custom'))
+						.map((item) => {
+							return (
+								<li class='list-item'>
+									<div>{item.name}</div>
+									<div>
+										<input
+											type='url'
+											name={item.name}
+											value={item.domain}
+											style='margin-left:20px;'
+											onchange={handleAgentSourcesUpdate}
+										/>
+									</div>
+									<button
+										class='save-button'
+										onclick={() => handleCustomAgentDeletion(item.name)}
+									>
+										<svg
+											xmlns='http://www.w3.org/2000/svg'
+											viewBox='0 0 32 32'
+											width='20px'
+											height='20px'
+										>
+											<path
+												fill='currentColor'
+												d='M16 3C8.832 3 3 8.832 3 16s5.832 13 13 13s13-5.832 13-13S23.168 3 16 3m0 2c6.087 0 11 4.913 11 11s-4.913 11-11 11S5 22.087 5 16S9.913 5 16 5m-3.78 5.78l-1.44 1.44L14.564 16l-3.782 3.78l1.44 1.44L16 17.437l3.78 3.78l1.44-1.437L17.437 16l3.78-3.78l-1.437-1.44L16 14.564l-3.78-3.782z'
+											></path>
+										</svg>
+									</button>
+								</li>
+							)
+						})}
+					<li class='list-item'>
+						<Show when={!addAgent()}>
+							<button
+								class='options-add-button'
+								style={{ 'margin-left': '0px' }}
+								onclick={() => setAddAgent(true)}
+								disabled
+							>
+								添 加
+							</button>
+						</Show>
+						<Show when={addAgent()}>
+							<div style={{ margin: '0 10px 0 0' }}>
+								<input
+									type='text'
+									placeholder='Agent 名称'
+									style={{ width: '130px' }}
+									id='new-agent-name'
+								/>
+							</div>
+							<div>
+								<input
+									type='url'
+									// name={item.name}
+									// value={item.domain}
+									style='margin-left:20px; width:25vw'
+									// onchange={handleAgentSourcesUpdate}
+									placeholder='平台网站地址'
+									id='new-agent-domain'
+								/>
+							</div>
+							<button
+								class='save-button'
+								onclick={() => handleAddCustomAgent(false)}
+							>
+								<svg
+									xmlns='http://www.w3.org/2000/svg'
+									viewBox='0 0 512 512'
+									width='20px'
+									height='20px'
+								>
+									<path
+										fill='red'
+										fill-rule='evenodd'
+										d='M420.48 121.813L390.187 91.52L256 225.92L121.813 91.52L91.52 121.813L225.92 256L91.52 390.187l30.293 30.293L256 286.08l134.187 134.4l30.293-30.293L286.08 256z'
+									></path>
+								</svg>
+							</button>
+							<button
+								class='save-button'
+								onclick={() => handleAddCustomAgent(true)}
+							>
+								<svg
+									xmlns='http://www.w3.org/2000/svg'
+									viewBox='0 0 20 20'
+									width='25px'
+									height='25px'
+								>
+									<path
+										fill='green'
+										d='m15.3 5.3l-6.8 6.8l-2.8-2.8l-1.4 1.4l4.2 4.2l8.2-8.2z'
+									></path>
+								</svg>
+							</button>
+						</Show>
+					</li>
+				</ul>
+			</div> */}
+		</>
+	)
+}
