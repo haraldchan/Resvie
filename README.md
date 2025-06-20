@@ -2,22 +2,22 @@
   <div align="center">
     <img src="/public/icon.png" alt="Logo" width="192" height="192">
   </div>
-  <h2 align="center" style="font-weight: 600">Reservation Handler</h2>
+  <h2 align="center" style="font-weight: 600">Resvie</h2>
   
   <p align="center">
     📑 订单信息，一键获取 ✔️
     <br />
-    <a href="https://addons.mozilla.org/zh-CN/firefox/addon/reservation-handler/" target="_blank"><strong> 访问Firefox Add-Ons </strong></a>
+    <a href="https://addons.mozilla.org/zh-CN/firefox/addon/resvie/" target="_blank"><strong> 访问Firefox Add-Ons </strong></a>
     <br />
     <br />
   </p>
 </p>
 
-欢迎使用 Reservation Handler！该插件可以在酒店订单打印界面帮助你获取关键信息，如客人姓名、订房数量、房价等，并将这些信息写出到剪贴板，以便与 RPA 软件（如 AutoHotkey、UiBot）进行配套使用，实现本地自动化。请按照以下说明正确使用该插件。
+欢迎使用 Resvie！该插件可以在酒店订单打印界面帮助你获取关键信息，如客人姓名、订房数量、房价等，并将这些信息写出到剪贴板，以便与 RPA 软件（如 AutoHotkey、UiBot）进行配套使用，实现本地自动化。请按照以下说明正确使用该插件。
 
 ## 🏢 支持的代理商列表
 
-Reservation Handler 目前支持以下酒店代理商：
+Resvie 目前支持以下酒店代理商：
 
 -   **深圳捷旅**
 -   **广州奇利**
@@ -57,7 +57,7 @@ Reservation Handler 目前支持以下酒店代理商：
 
 ```json
 {
-	"identifier": "ReservationHandler",
+	"identifier": "031709eafc20ab898d6b9e9860d31966",
 	"agent": "fliggy",
 	"payment": "预付",
 	"orderId": 3677060125483689000,
@@ -95,7 +95,7 @@ Reservation Handler 目前支持以下酒店代理商：
 
 ```json
 {
-	"identifier": "ReservationHandler",
+	"identifier": "031709eafc20ab898d6b9e9860d31966",
 	"agent": "fedex",
 	"resvType": "ADD",
 	"roomQty": 2,

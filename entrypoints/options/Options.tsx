@@ -17,11 +17,11 @@ export default function Options() {
 			<div class='column-left'>
 				<header class='header'>
 					<img
-						src={browser.runtime.getURL('/icon.png')}
+						src={browser.runtime.getURL('/icon/icon.png')}
 						alt='logo'
 					/>{' '}
 					<span>
-						<p>Reservation Handler</p>
+						<p>Resvie</p>
 						<p>2.0.0</p>
 					</span>
 				</header>
