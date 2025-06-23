@@ -41,12 +41,24 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 		updatedResvInfo.stayHours = getStayHours(updatedResvInfo.ciDate, updatedResvInfo.ETA, updatedResvInfo.coDate, updatedResvInfo.ETD)
 		updatedResvInfo.daysActual = getDaysActual(updatedResvInfo.stayHours) as number
 		updatedResvInfo.roomRates = Array(updatedResvInfo.daysActual).fill(fedexInfo()?.roomRates[0])
-
+		
 		console.log(updatedResvInfo)
 		setFedexInfo(null)
 		setFedexInfo(updatedResvInfo)
 		copyToClipboard(JSON.stringify(updatedResvInfo))
 	}
+
+	onMount(() => {
+		const updated = fedexInfo() as ReservationFedex
+		if (updated !== null) {
+			updated.stayHours = getStayHours(updated.ciDate, updated.ETA, updated.coDate, updated.ETD)
+			updated.daysActual = getDaysActual(updated.stayHours) as number
+			updated.roomRates = Array(updated.daysActual).fill(fedexInfo()?.roomRates[0])
+
+			setFedexInfo(null)
+			setFedexInfo(updated)
+		}
+	})
 
 	return (
 		<>
@@ -57,9 +69,7 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 					alt='Fedex Logo'
 				/>
 			</header>
-			<form
-				onSubmit={handleFormFormating}
-			>
+			<form onSubmit={handleFormFormating}>
 				<div class='form-row'>
 					<label>
 						<span class='form-label'>订单类型</span>
