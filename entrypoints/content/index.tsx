@@ -2,19 +2,12 @@ import './style.css'
 import App from './App'
 
 export default defineContentScript({
-	matches: [
-		'*://ebooking.jladmin.cn/*',
-		'*://ql-gz.com/ebooking/*',
-		'*://www.ql-gz.com/ebooking/*',
-		// '*://ebooking.ctrip.com/*',
-		// '*://eb.meituan.com/*',
-		// '*://hotel.fliggy.com/*',
-		'*://mail.qiye.163.com/*',
-	],
+	matches: ["<all_urls>"],
 	cssInjectionMode: 'ui',
+	// runAt: import.meta.env.BROWSER === 'chrome' ? 'document_start' : undefined,
 	async main(ctx) {
 		const ui = await createShadowRootUi(ctx, {
-			name: 'rh-app',
+			name: 'resvie-app',
 			position: 'inline',
 			anchor: 'body',
 		
