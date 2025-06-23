@@ -2,8 +2,9 @@
 import parserMap from '@/parsers/ota-parsers'
 import parseReservationByDeepSeek from '@/parsers/ds-parser'
 import FedexMail from '@/parsers/fedex-parsers'
-// models
-import { Agents, agentSrcDefault, ReservationFedex, ReservationOTA } from '@/models/models'
+// models and defaults
+import { Agents, ReservationFedex, ReservationOTA } from '@/models/models'
+import { defaultAgentSrc } from '@/models/defaults'
 // components
 import CollapseButton from './components/collapse-button'
 import ReservationFormOTA from './components/reservation-form-ota'
@@ -13,6 +14,7 @@ import { Puff } from 'solid-spinner'
 export type ModalState = 'hide' | 'parsing' | 'expanded' | 'error'
 
 export default function App() {
+	const [isReadablePage, setIsReadablePage] = createSignal(false)
 	const [modalState, setModalState] = createSignal<ModalState>('hide')
 	const [otaInfo, setOtaInfo] = createSignal<ReservationOTA | null>(null)
 	const [fedexInfo, setFedexInfo] = createSignal<ReservationFedex | null>(null)
@@ -55,18 +57,16 @@ export default function App() {
 	}
 
 	async function validatePage() {
-		const agentSrc: Agents = (await storage.getItem('local:agentSrc')) ?? agentSrcDefault
+		const agentSrc: Agents = (await storage.getItem('local:agentSrc')) ?? defaultAgentSrc
 		const url = window.location.href
 
-		const curAgent = agentSrc.find((agent) => url.includes(agent.domain))?.agent
+		const curAgent = agentSrc.find((agent) => url.includes(agent.domain) && url.toLowerCase().includes(agent.urlKeyword.toLowerCase()))?.agent
 		if (curAgent === undefined) {
+			setIsReadablePage(false)
 			return
 		}
 
-		if (!url.toLowerCase().includes('print') && !url.includes('THotelOrderformShowDpAct') && !url.includes('readhtml')) {
-			return
-		}
-
+		setIsReadablePage(true)
 		return curAgent
 	}
 
@@ -75,8 +75,6 @@ export default function App() {
 			let res = parserMap.get(curAgent)?.() as ReservationOTA
 
 			if (!res) {
-				setModalState('parsing')
-
 				const parsed = await parseReservationByDeepSeek(curAgent)
 				if (parsed.success) {
 					return parsed.data as ReservationOTA
@@ -90,9 +88,7 @@ export default function App() {
 			}
 		} catch (err) {
 			console.log(err)
-			// using ds
-			setModalState('parsing')
-			console.log('using deepseek...')
+
 			const parsed = await parseReservationByDeepSeek(curAgent)
 			if (parsed.success) {
 				return parsed.data as ReservationOTA
@@ -135,29 +131,48 @@ export default function App() {
 		const curAgent = await validatePage()
 		if (!curAgent) return
 
+		const mediaQueryList = window.matchMedia('print')
+		mediaQueryList.addEventListener('change', function loadOnPrint(mql) {
+			if (mql.matches) {
+				window.onafterprint = async () => {
+					const res = await getInfoOTA(curAgent)
+					setOtaInfo(res)
+					setFedexInfo(null)
+					console.log(res)
+					await copyToClipboard(JSON.stringify(res))
+					window.onafterprint = () => 'cleared'
+				}
+
+				mediaQueryList.removeEventListener('change', loadOnPrint)
+			}
+		})
+
+		setModalState('parsing')
+
 		if (curAgent === 'email') {
 			const res = await getInfoFedex()
-
 			setFedexInfo(res)
 			setOtaInfo(null)
 			console.log(res)
 			await copyToClipboard(JSON.stringify(res))
 		} else {
-			if (curAgent === 'fliggy' || curAgent === 'ctrip') {
-				setModalState('parsing')
-				await new Promise((r) => setTimeout(r, 3000))
+			if (curAgent !== 'jielv' && curAgent !== 'kingsley') {
+				await new Promise((r) => setTimeout(r, 2000))
 			}
-
-			const res = await getInfoOTA(curAgent)
-			setOtaInfo(res)
-			setFedexInfo(null)
-			console.log(res)
-			await copyToClipboard(JSON.stringify(res))
+			
+			if (window.onafterprint === null) {
+				const res = await getInfoOTA(curAgent)
+				setOtaInfo(res)
+				setFedexInfo(null)
+				console.log(res)
+				await copyToClipboard(JSON.stringify(res))
+			}
 		}
 	})
 
 	return (
 		<div
+			style={{ display: isReadablePage() ? 'block' : 'none' }}
 			classList={{
 				'rh-modal': true,
 				'border-gradient': true,
