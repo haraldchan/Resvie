@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import { ChatCompletionMessageParam } from 'openai/resources'
-import { DeepSeek, ReservationFedex, ReservationOTA } from '@/models/models'
+import { DeepSeek, Prompts, ReservationFedex, ReservationOTA } from '@/models/models'
+import { defaultPrompts } from '@/models/defaults'
 
 type ParseResult =
     | { success: true; data: ReservationOTA | ReservationFedex }
@@ -17,66 +18,31 @@ function quickClean(html: string): string {
 }
 
 const serializer = new XMLSerializer()
-function setMessage(agent: string, content: string): ChatCompletionMessageParam[] {
+async function setMessage(agent: string, html: string): Promise<ChatCompletionMessageParam[]> {
+    const prompts = await storage.getItem<Prompts>('local:prompts') ?? defaultPrompts
 
     return agent === 'fedex'
         ? [
             {
                 role: 'system',
-                content: `
-                You are an expert HTML-to-JSON converter. Strictly follow these rules:
-                1. Extract reservation data from HTML into JSON. if New Resv table line exist, always use this line
-                2. Use this schema:
-                {              
-                    identifier: '031709eafc20ab898d6b9e9860d31966', <- fixed
-                    agent: ${agent}, <- fixed
-                    resvType: "ADD"|"CHANGE", <- if "ADD HOTEL RESERVATION" then ADD, otherwise CHANGE
-                    roomQty: number, <- from col "Rooms"
-                    flightIn: string, <- from col "Inbd Flight", no spaces in between
-                    flightOut: string, from col "Outbd Flight", no spaces in between
-                    ciDate: string,
-                    ETA: string,
-                    coDate: string,
-                    ETD: string,
-                    stayHours: string, <- calculate by diffing check-in and check-out time, format it as "HH:MM"
-                    daysActual: number, <- count each 24h as a day, if exceeded minutes and not 24h yet, count it as a day, example: 24:12 = 2
-                    roomRates: number[], <- from daily rate*1.15, toFixed(2), length should be the same with daysActual
-                    crewNames: string[], <- only names, no title & staff ids
-                    tripNum: string, <- from Trip#, 58 OAK 67 02Jun25 <- 58/67
-                    tracking: string <- fromTracking # 
-                }
-                3. Convert dates to yyyy-MM-dd, times should be HH:mm without meridian.
-            `
+                content: prompts.find(item => item.agent === 'email')?.prompt.system ?? defaultPrompts.find(item => item.name === 'FedEx 邮件')!.prompt.system
             },
             {
                 role: 'user',
-                content: `${content}`
+                content: `${html}`
             }
         ] : [
             {
                 role: 'system',
-                content: `
-                You are an expert HTML-to-JSON converter. Strictly follow these rules:
-                1. Extract reservation data from HTML into JSON.
-                2. Use this schema:
-                {        
-                    identifier: '031709eafc20ab898d6b9e9860d31966', <- fixed
-                    agent: , <- fixed
-                    orderId: number, <- extracted from '订单号'
-                    guestNames: string[], <- extracted from '客人/客人姓名'
-                    roomType: string, <-  extracted from '房/类型'never return character after '房'
-                    roomQty: number, <- look for how many rooms reserved
-                    ciDate: "yyyy-MM-dd", <- extracted from 入/入住/日期
-                    coDate: "yyyy-MM-dd", <- extracted from 离/退/退房/日期
-                    roomRates: number[], <- extracted from 房价 related fields
-                    bbf: number[] <- when no breakfast, just return [0]
-                    remarks: string <- if 要求/房型产品/备注/remarks  exists, return it here.
-                }
-            `
+                content: prompts.find(item => item.agent === agent)?.prompt.system ?? defaultPrompts.find(item => item.agent === 'jielv')!.prompt.system
             },
             {
                 role: 'user',
-                content: `${content}`
+                content: `
+                    <user>${prompts.find(item => item.agent === agent)?.prompt.user ?? defaultPrompts.find(item => item.agent === 'jielv')!.prompt.user}</user>
+                    <variable>agent=${agent.replace('custom-', '')}</variable>
+                    <html>${html}</html>
+                `
             }
         ]
 }
@@ -93,7 +59,7 @@ export default async function parseReservationByDeepSeek(agent: string): Promise
         dangerouslyAllowBrowser: true
     })
 
-    const messages = setMessage(agent, quickClean(serializer.serializeToString(document.body)))
+    const messages = await setMessage(agent, quickClean(serializer.serializeToString(document.body)))
 
     try {
         const response = await openai.chat.completions.create({

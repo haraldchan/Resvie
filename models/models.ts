@@ -1,17 +1,17 @@
-export const agentSrcDefault = [
-	{ agent: 'jielv', name: '深圳捷旅', domain: 'ebooking.jladmin.cn' },
-	{ agent: 'kingsley', name: '广州奇利', domain: 'ql-gz.com/ebooking' },
-	// { agent: 'ctrip', name: '携程酒店', domain: 'ebooking.ctrip.com' },
-	// { agent: 'meituan', name: '美团酒店', domain: 'eb.meituan.com' },
-	// { agent: 'fliggy', name: '飞猪旅行', domain: 'hotel.fliggy.com' },
-	{ agent: 'email', name: 'FedEx 邮件', domain: 'mail.qiye.163.com' },
-	// { agentName: '微信商城', domain: 'ebooking.jladmin.cn' },
-]
-
 export type Agents = {
 	agent: string
 	name: string
-	domain: string
+	domain: string,
+	urlKeyword: string
+}[]
+
+export type Prompts = {
+	agent: string
+	name: string
+	prompt: {
+		system: string
+		user: string
+	}
 }[]
 
 export type DeepSeek = {
