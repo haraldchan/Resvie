@@ -1,17 +1,19 @@
-import { Agents, agentSrcDefault } from '@/models/models'
+import { Agents } from '@/models/models'
+import { defaultAgentSrc, defaultOtaSystemPrompt, defaultOtaUserPrompt } from '@/models/defaults'
+import { prompts, setPrompts } from './prompt-options'
 
 export default function OtaOptions() {
-	const [agentSrc, setAgentSrc] = createSignal<Agents>(agentSrcDefault)
+	const [agentSrc, setAgentSrc] = createSignal<Agents>(defaultAgentSrc)
 	const [addAgent, setAddAgent] = createSignal<boolean>(false)
 
 	function handleAgentSourcesUpdate(e: Event) {
 		const input = e.target as HTMLInputElement
 		const updated = agentSrc().map((item) => {
 			if (item.name === input.name) {
-				return {
-					agent: item.agent,
-					name: item.name,
-					domain: input.value,
+				if (input.type === 'url') {
+					return { ...item, domain: input.value }
+				} else {
+					return { ...item, urlKeyword: input.value }
 				}
 			} else {
 				return item
@@ -20,13 +22,15 @@ export default function OtaOptions() {
 
 		setAgentSrc(updated)
 		storage.setItem('local:agentSrc', updated)
+
 	}
 
 	async function handleAddCustomAgent(isSave: boolean) {
 		if (isSave) {
 			const name = document.getElementById('new-agent-name') as HTMLInputElement
 			const domain = document.getElementById('new-agent-domain') as HTMLInputElement
-			if (name.value === '' || domain.value === '') {
+			const urlKeyword = document.getElementById('new-agent-urlKeyword') as HTMLInputElement
+			if (name.value === '' || domain.value === '' || urlKeyword.value === '') {
 				setAddAgent(false)
 				return
 			}
@@ -35,24 +39,39 @@ export default function OtaOptions() {
 				agent: 'custom-' + domain.value.split('.')[1],
 				domain: domain.value,
 				name: name.value,
+				urlKeyword: urlKeyword.value,
+			}
+
+			const newPrompt = {
+				agent: newAgent.agent,
+				name: newAgent.name,
+				prompt: {
+					system: defaultOtaSystemPrompt,
+					user: defaultOtaUserPrompt
+				}
 			}
 
 			setAgentSrc([...agentSrc(), newAgent])
+			setPrompts([...prompts(), newPrompt])
 			storage.setItem('local:agentSrc', agentSrc())
+			storage.setItem('local:prompts', prompts())
 		}
-
+		
 		setAddAgent(false)
 	}
-
+	
 	async function handleCustomAgentDeletion(name: string) {
-		const updated = agentSrc().filter((agent) => agent.name !== name)
-
-		setAgentSrc(updated)
+		const updatedAgentSrc = agentSrc().filter(agent => agent.name !== name)
+		const updatedPrompts = prompts().filter(agent => agent.name !== name)
+		
+		setAgentSrc(updatedAgentSrc)
+		setPrompts(updatedPrompts)
 		storage.setItem('local:agentSrc', agentSrc())
+		storage.setItem('local:prompts', prompts())		
 	}
 
 	onMount(async () => {
-		setAgentSrc((await storage.getItem('local:agentSrc')) ?? agentSrcDefault)
+		setAgentSrc((await storage.getItem('local:agentSrc')) ?? defaultAgentSrc)
 	})
 
 	return (
@@ -60,8 +79,8 @@ export default function OtaOptions() {
 			<div class='options-details-section'>
 				<header class='options-header'>
 					<span>平台名称</span>
-					<span>网站地址</span>
-					{/* <span>强制 AI</span> */}
+					<span style='width: 21vw'>网站地址</span>
+					<span>URL 关键字</span>
 				</header>
 				<ul class='options-items'>
 					{agentSrc()
@@ -75,7 +94,16 @@ export default function OtaOptions() {
 											type='url'
 											name={item.name}
 											value={item.domain}
-											style='margin-left:20px;'
+											style='margin-left:20px; width: 20vw'
+											onchange={handleAgentSourcesUpdate}
+										/>
+									</div>
+									<div>
+										<input
+											type='text'
+											name={item.name}
+											value={item.urlKeyword}
+											style='margin-left:10px; width: 10vw'
 											onchange={handleAgentSourcesUpdate}
 										/>
 									</div>
@@ -84,14 +112,14 @@ export default function OtaOptions() {
 						})}
 				</ul>
 			</div>
-{/* 
+
 			<h1 style='margin-top:30px'>自定义平台</h1>
 			<p>此部分将由大模型解析</p>
 			<div class='options-details-section'>
 				<header class='options-header'>
 					<span>平台名称</span>
-					<span>网站地址</span>
-
+					<span style='width: 21vw'>网站地址</span>
+					<span>URL 关键字</span>
 				</header>
 				<ul class='options-items'>
 					{agentSrc()
@@ -105,7 +133,16 @@ export default function OtaOptions() {
 											type='url'
 											name={item.name}
 											value={item.domain}
-											style='margin-left:20px;'
+											style='margin-left:20px; width: 20vw'
+											onchange={handleAgentSourcesUpdate}
+										/>
+									</div>
+									<div>
+										<input
+											type='text'
+											name={item.name}
+											value={item.urlKeyword}
+											style='margin-left:10px; width: 10vw'
 											onchange={handleAgentSourcesUpdate}
 										/>
 									</div>
@@ -134,7 +171,6 @@ export default function OtaOptions() {
 								class='options-add-button'
 								style={{ 'margin-left': '0px' }}
 								onclick={() => setAddAgent(true)}
-								disabled
 							>
 								添 加
 							</button>
@@ -151,12 +187,17 @@ export default function OtaOptions() {
 							<div>
 								<input
 									type='url'
-									// name={item.name}
-									// value={item.domain}
-									style='margin-left:20px; width:25vw'
-									// onchange={handleAgentSourcesUpdate}
+									style='margin-left:20px; width:20vw'
 									placeholder='平台网站地址'
 									id='new-agent-domain'
+								/>
+							</div>
+							<div>
+								<input
+									type='text'
+									style='margin-left:10px; width: 10vw'
+									placeholder='订单页面关键字'
+									id='new-agent-urlKeyword'
 								/>
 							</div>
 							<button
@@ -195,7 +236,7 @@ export default function OtaOptions() {
 						</Show>
 					</li>
 				</ul>
-			</div> */}
+			</div>
 		</>
 	)
 }
