@@ -5,9 +5,16 @@ export default function ModelOptions() {
 
 	function handleApiUpdate(e: Event) {
 		const input = e.target as HTMLInputElement
-		const updated = deepseek()
-		updated.key = input.value
+		const updated = {...deepseek(), key: input.value}
 
+		setDeepseek(updated)
+		storage.setItem('local:deepseek', updated)
+	}
+	
+	function handleModelUpdate(e: Event) {
+		const select = e.target as HTMLSelectElement
+		const updated = {...deepseek(), model: select.value}
+		
 		setDeepseek(updated)
 		storage.setItem('local:deepseek', updated)
 	}
@@ -36,6 +43,10 @@ export default function ModelOptions() {
 							value={deepseek().key}
 							onchange={handleApiUpdate}
 						/>
+						<select name="model-select" id="model-select" onchange={handleModelUpdate}>
+							<option value="deepseek-chat">chat</option>
+							<option value="deepseek-reasoner">reasoner</option>
+						</select>
 					</div>
 				</li>
 			</ul>
