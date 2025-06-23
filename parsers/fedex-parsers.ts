@@ -6,16 +6,15 @@ export default function FedexMail(): ReservationFedex {
     const flightInfoTable = document.querySelectorAll('div tbody')[2].children
     const newResv = Array.from(flightInfoTable[flightInfoTable.length - 1].children) as HTMLElement[]
 
-    let col = resvType === 'ADD' ? 0 : 1
-    const roomQty = Number(newResv[col].innerText)
-    const roomRatePerNight = parseFloat(newResv[col + 1].innerText) * 1.15
-    const flightIn = newResv[col + 2].innerText.replace(' ', '')
-    const flightOut = newResv[col + 5].innerText.replace(' ', '')
-    const [ciDate, ETA] = parseDateString(newResv[col + 3].innerText)
-    const [coDate, ETD] = parseDateString(newResv[col + 4].innerText)
+    const flightOut = newResv.at(-1)!.innerText.replace(' ', '')
+    const [coDate, ETD] = parseDateString(newResv.at(-2)!.innerText)
+    const [ciDate, ETA] = parseDateString(newResv.at(-3)!.innerText)
+    const flightIn = newResv.at(-4)!.innerText.replace(' ', '')
     const stayHours = getStayHours(ciDate, ETA, coDate, ETD)
     const daysActual = getDaysActual(stayHours)
+    const roomRatePerNight = parseFloat(newResv.at(-5)!.innerText) * 1.15
     const roomRates = Array(daysActual).fill(parseFloat(roomRatePerNight.toFixed(2)))
+    const roomQty = Number(newResv.at(-6)!.innerText)
 
     const crewInfo = document.querySelector('div .content') as HTMLElement
     const crewNames = getCrewNames(crewInfo.innerText.split('\n')[0])
