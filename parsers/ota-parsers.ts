@@ -118,8 +118,21 @@ const ctripAttributedFields = {
 	roomRates: "html:RoomPriceText",
 	payment: "html: $data.PaymentTermDisplay",
 	remarks: "html:CtripRemarks",
+	company: "html: CompanyName"
 }
-function Ctrip(): ReservationOTA {
+function Ctrip() {
+	const url = window.location.href
+
+	if (url.includes('SourceType=1')) {
+		return ctripOta()
+	}
+
+	if (url.includes('SourceType=6')) {
+		return ctripBusiness()
+	}
+}
+
+function ctripOta(): ReservationOTA {
 	const attr = 'data-bind'
 	const orderId = getElementWithAttribute('label', attr, ctripAttributedFields.orderId)!.innerText.replace(/[^0-9]/ig, "")
 	const guestNames = getElementWithAttribute('span', attr, ctripAttributedFields.name)!.innerHTML.split('&')[0].split(',')
@@ -137,7 +150,42 @@ function Ctrip(): ReservationOTA {
 
 	return {
 		identifier: '031709eafc20ab898d6b9e9860d31966',
-		agent: 'jielv',
+		agent: 'ctrip-ota',
+		payment,
+		orderId,
+		roomType,
+		roomRates,
+		guestNames,
+		ciDate,
+		coDate,
+		roomQty,
+		bbf,
+		remarks
+	}
+}
+
+function ctripBusiness() {
+	const attr = 'data-bind'
+	const orderId = getElementWithAttribute('label', attr, ctripAttributedFields.orderId)!.innerText.replace(/[^0-9]/ig, "")
+	const company = getElementWithAttribute('span', attr, ctripAttributedFields.company)!.innerText
+	const guestNames = getElementWithAttribute('span', attr, ctripAttributedFields.name)!.innerHTML.split('&')[0].split(',')
+	const cicoField = getElementWithAttribute('span', attr, ctripAttributedFields.cico)!.innerText.split(' ')[0].split('-')
+	const ciDate = cicoField[0].replaceAll('/', '-')
+	const coDate = cicoField[1].replaceAll('/', '-')
+	const roomType = getElementWithAttribute('span', attr, ctripAttributedFields.roomType)!.innerText.split('房')[0] + '房'
+	const roomQty = Number(getElementWithAttribute('b', attr, ctripAttributedFields.roomQty)!.innerText)
+	const payment = getElementWithAttribute('span', attr, ctripAttributedFields.payment)!.innerText
+	const remarks = document.getElementById('lblRemark')!.innerText.replaceAll('\n', '; ')
+
+	const rateFieldText = getElementWithAttribute('span', attr, ctripAttributedFields.roomRates)!.innerText
+	const roomRate = Number(rateFieldText.split('RMB')[1].split('含')[0])
+	const roomRates = Array(dateDiffInDays(ciDate, coDate)).fill(roomRate)
+	const bbf = Array(dateDiffInDays(ciDate, coDate)).fill(rateFieldText.includes('含双早') ? 2 : 1)
+
+	return {
+		identifier: '031709eafc20ab898d6b9e9860d31966',
+		agent: 'ctrip-business',
+		company,
 		payment,
 		orderId,
 		roomType,
