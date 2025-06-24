@@ -22,6 +22,7 @@ export type DeepSeek = {
 export type ReservationOTA = {
 	identifier: string
 	agent: string
+	company?: string
 	payment: string
 	orderId: string
 	roomType: string
