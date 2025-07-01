@@ -118,7 +118,8 @@ const ctripAttributedFields = {
 	roomRates: "html:RoomPriceText",
 	payment: "html: $data.PaymentTermDisplay",
 	remarks: "html:CtripRemarks",
-	company: "html: CompanyName"
+	company: "html: CompanyName",
+	package: "text:MealOrderInfo.allInfoTitle"
 }
 function Ctrip() {
 	const url = window.location.href
@@ -139,10 +140,12 @@ function ctripOta(): ReservationOTA {
 	const cicoField = getElementWithAttribute('span', attr, ctripAttributedFields.cico)!.innerText.split(' ')
 	const ciDate = cicoField[0].replaceAll('/', '-')
 	const coDate = cicoField[2].replaceAll('/', '-')
-	const roomType = getElementWithAttribute('span', attr, ctripAttributedFields.roomType)!.innerText.split('房')[0] + '房'
+	const roomNameField = getElementWithAttribute('span', attr, ctripAttributedFields.roomType)!.innerText
+	const roomType = roomNameField.split('房')[0] + '房'
+	const packages = getElementWithAttribute('span', attr, ctripAttributedFields.package)?.innerText ?? ''
 	const roomQty = Number(getElementWithAttribute('b', attr, ctripAttributedFields.roomQty)!.innerText)
-	const payment = getElementWithAttribute('span', attr, ctripAttributedFields.payment)!.innerText
-	const remarks = document.getElementById('lblRemark')!.innerText.replaceAll('\n', '; ')
+	const payment = (roomNameField.includes('商旅尊享') ? "商旅" : "") + getElementWithAttribute('span', attr, ctripAttributedFields.payment)!.innerText
+	const remarks = document.getElementById('lblRemark')!.innerText.split('\n').filter(r => r.includes('要求') || r.includes('留言')).join('; ')
 
 	const rateFieldText = getElementWithAttribute('span', attr, ctripAttributedFields.roomRates)!.innerText.split('\n')
 	const roomRates = rateFieldText.filter(field => field != '').map(field => Number(field.split(' ')[2].replace('CNY', '')))
@@ -154,6 +157,7 @@ function ctripOta(): ReservationOTA {
 		payment,
 		orderId,
 		roomType,
+		packages,
 		roomRates,
 		guestNames,
 		ciDate,
