@@ -23,6 +23,7 @@ export type ReservationOTA = {
 	identifier: string
 	agent: string
 	company?: string
+	packages?: string
 	payment: string
 	orderId: string
 	roomType: string
