@@ -10,8 +10,7 @@ type Props = {
 export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboard }: Props) {
 	function handleFormFormating(e: Event) {
 		e.preventDefault()
-		const target = e.type === 'submit' ? (e.target as HTMLFormElement) : (e.target as HTMLInputElement)
-		const form = target.tagName === 'form' ? target : target.form
+		const form = e.target as HTMLFormElement
 		const formData = new FormData(form)
 
 		const updatedResvInfo = otaInfo() as ReservationOTA
@@ -40,17 +39,9 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 		const ciDate = new Date(updatedResvInfo.ciDate)
 		const coDate = new Date(updatedResvInfo.coDate)
 		const dateDiffInDays = (coDate.getTime() - ciDate.getTime()) / (1000 * 60 * 60 * 24)
-
-		if (target.name === 'ciDate') {
-			updatedResvInfo.roomRates = Array(dateDiffInDays).fill(otaInfo()?.roomRates[0])
-			updatedResvInfo.bbf = Array(dateDiffInDays).fill(otaInfo()?.bbf[0])
-		}
-
-		if (target.name === 'coDate') {
-			updatedResvInfo.roomRates = Array(dateDiffInDays).fill(otaInfo()?.roomRates[0])
-			updatedResvInfo.bbf = Array(dateDiffInDays).fill(otaInfo()?.bbf[0])
-		}
-
+		updatedResvInfo.roomRates = Array(dateDiffInDays).fill(otaInfo()?.roomRates[0])
+		updatedResvInfo.bbf = Array(dateDiffInDays).fill(otaInfo()?.bbf[0])
+		
 		console.log(updatedResvInfo)
 		setOtaInfo(null)
 		setOtaInfo(updatedResvInfo)
@@ -68,7 +59,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='orderId'
 						type='text'
 						value={otaInfo()?.orderId}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -80,7 +70,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='guestNames'
 						type='text'
 						value={otaInfo()?.guestNames}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -92,7 +81,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='roomType'
 						type='text'
 						value={otaInfo()?.roomType}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -104,7 +92,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='roomQty'
 						type='text'
 						value={otaInfo()?.roomQty}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -116,7 +103,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='ciDate'
 						type='date'
 						value={otaInfo()?.ciDate}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -128,7 +114,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='coDate'
 						type='date'
 						value={otaInfo()?.coDate}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -140,7 +125,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='roomRates'
 						type='text'
 						value={otaInfo()?.roomRates.toString()}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -152,7 +136,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='bbf'
 						type='text'
 						value={otaInfo()?.bbf.toString()}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>
@@ -164,7 +147,6 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 						name='remarks'
 						type='text'
 						value={otaInfo()?.remarks}
-						on:blur={handleFormFormating}
 					/>
 				</label>
 			</div>

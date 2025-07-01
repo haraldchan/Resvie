@@ -9,9 +9,9 @@ type Props = {
 }
 
 export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToClipboard }: Props) {
-	function handleFormFormating(e: Event) {
+	async function handleFormFormating(e: Event) {
 		e.preventDefault()
-		const form = e.type === 'submit' ? (e.target as HTMLFormElement) : ((e.target as HTMLInputElement).form as HTMLFormElement)
+		const form = e.target as HTMLFormElement
 		const formData = new FormData(form)
 
 		const updatedResvInfo = fedexInfo() as ReservationFedex
@@ -41,7 +41,7 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 		updatedResvInfo.stayHours = getStayHours(updatedResvInfo.ciDate, updatedResvInfo.ETA, updatedResvInfo.coDate, updatedResvInfo.ETD)
 		updatedResvInfo.daysActual = getDaysActual(updatedResvInfo.stayHours) as number
 		updatedResvInfo.roomRates = Array(updatedResvInfo.daysActual).fill(fedexInfo()?.roomRates[0])
-		
+
 		console.log(updatedResvInfo)
 		setFedexInfo(null)
 		setFedexInfo(updatedResvInfo)
@@ -78,7 +78,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='resvType'
 							type='text'
 							value={fedexInfo()?.resvType}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -90,7 +89,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='tripNum'
 							type='text'
 							value={fedexInfo()?.tripNum}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -102,7 +100,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='crewNames'
 							type='text'
 							value={fedexInfo()?.crewNames}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -114,7 +111,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='roomQty'
 							type='text'
 							value={fedexInfo()?.roomQty}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -126,7 +122,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='flightIn'
 							type='text'
 							value={fedexInfo()?.flightIn}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -139,7 +134,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='ciDate'
 							type='date'
 							value={fedexInfo()?.ciDate}
-							on:blur={handleFormFormating}
 						/>
 						<input
 							style={{ width: '100px' }}
@@ -147,7 +141,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='ETA'
 							type='time'
 							value={fedexInfo()?.ETA}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -159,7 +152,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='flightOut'
 							type='text'
 							value={fedexInfo()?.flightOut}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -172,7 +164,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='coDate'
 							type='date'
 							value={fedexInfo()?.coDate}
-							on:blur={handleFormFormating}
 						/>
 						<input
 							style={{ width: '100px' }}
@@ -180,7 +171,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='ETD'
 							type='time'
 							value={fedexInfo()?.ETD}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
@@ -214,7 +204,6 @@ export default function ReservationFormFedex({ fedexInfo, setFedexInfo, copyToCl
 							name='tracking'
 							type='text'
 							value={fedexInfo()?.tracking}
-							on:blur={handleFormFormating}
 						/>
 					</label>
 				</div>
