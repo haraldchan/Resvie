@@ -59,7 +59,6 @@ export default function App() {
 	async function validatePage() {
 		const agentSrc: Agents = (await storage.getItem('local:agentSrc')) ?? defaultAgentSrc
 		const url = window.location.href
-
 		const curAgent = agentSrc.find((agent) => url.includes(agent.domain) && url.toLowerCase().includes(agent.urlKeyword.toLowerCase()))?.agent
 		if (curAgent === undefined) {
 			setIsReadablePage(false)
@@ -72,7 +71,7 @@ export default function App() {
 
 	async function getInfoOTA(curAgent: string) {
 		try {
-			let res = parserMap.get(curAgent)?.() as ReservationOTA
+			let res = await parserMap.get(curAgent)?.() as ReservationOTA
 
 			if (!res) {
 				const parsed = await parseReservationByDeepSeek(curAgent)
@@ -157,7 +156,7 @@ export default function App() {
 			await copyToClipboard(JSON.stringify(res))
 		} else {
 			if (curAgent !== 'jielv' && curAgent !== 'kingsley') {
-				await new Promise((r) => setTimeout(r, 2000))
+				await new Promise((r) => setTimeout(r, 2500))
 			}
 			
 			if (window.onafterprint === null) {
