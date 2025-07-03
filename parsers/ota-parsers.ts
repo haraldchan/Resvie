@@ -52,7 +52,8 @@ function Kingsley(): ReservationOTA {
 		// single rate
 		roomRates = roomNightSplitter(rateInfoText)
 	}
-	const remarks = document.querySelectorAll('table')[3].children[0].children[0].children[0].textContent!.split('：')[2].split('，房价请向客人保密。')[1]
+	const remarksField = document.querySelectorAll('table')[3].children[0].children[0].children[0] as HTMLElement
+	const remarks = remarksField.innerText.split('\n').slice(2).join(', ')
 
 	return {
 		identifier: '031709eafc20ab898d6b9e9860d31966',
@@ -168,7 +169,7 @@ function ctripOta(): ReservationOTA {
 	}
 }
 
-function ctripBusiness() {
+function ctripBusiness(): ReservationOTA {
 	const attr = 'data-bind'
 	const orderId = getElementWithAttribute('label', attr, ctripAttributedFields.orderId)!.innerText.replace(/[^0-9]/ig, "")
 	const company = getElementWithAttribute('span', attr, ctripAttributedFields.company)!.innerText
@@ -204,53 +205,46 @@ function ctripBusiness() {
 }
 
 parserMap.set('meituan', Meituan)
-function Meituan() {
-	const infoObj: Partial<ReservationOTA> = {
-		identifier: '031709eafc20ab898d6b9e9860d31966',
-		agent: 'metuan',
-	}
-	const infoItems = document.querySelectorAll('.detail-info-item')
-	infoObj.orderId = (infoItems[0].children[1] as HTMLElement).innerText.split(' ')[0]
+async function Meituan(): Promise<ReservationOTA> {
+	(document.querySelector('.btn-text') as HTMLSpanElement).click()
+	
+	const result = new Promise<ReservationOTA>(resolve => {
+		const nameField = (document.querySelector('.btn-text') as HTMLSpanElement).innerText
+		const loop = setInterval(() => {
+			if (!nameField.includes('*')) {
+				clearInterval(loop)
+				const resvInfo: Record<string, any> = {}
+				const contents = Array.from(document.querySelectorAll('.info-content')) as HTMLElement[]
 
-	const guestNames = (infoItems[3] as HTMLElement).innerText.split('\n')[1]
-	if (guestNames.includes('、')) {
-		infoObj.guestNames = guestNames.split('、')
-	} else {
-		infoObj.guestNames = [guestNames]
-	}
+				resvInfo.orderId = contents[0].innerText.split(' ')[0]
+				resvInfo.guestNames = contents[3].innerText.includes('、') ? contents[3].innerText.split('、') : [contents[3].innerText]
+				resvInfo.roomType = contents[5].innerText.split('房')[0] + '房'
+				resvInfo.roomQty = parseInt(contents[5].innerText.split(' ')[1].replace('间', ''))
+				const [ciDate, _, coDate] = contents[6].innerText.split(' ')
+				resvInfo.ciDate = ciDate
+				resvInfo.coDate = coDate
+				resvInfo.payment = contents[7].innerText
 
-	const roomCharIndex = (infoItems[5] as HTMLElement).innerText.split('\n')[1].indexOf('房')
-	infoObj.roomType = (infoItems[5] as HTMLElement).innerText.split('\n')[1].slice(0, roomCharIndex + 1)
-	infoObj.roomQty = Number((infoItems[5].children[1].children[0] as HTMLElement).innerText.slice(0, 1))
+				const rateInfo = Array.from(contents[9].children) as HTMLElement[]
+				resvInfo.roomRates = rateInfo.map(line => parseFloat((line.children[0] as HTMLSpanElement).innerText.replace('￥', '')))
+				resvInfo.bbf = rateInfo.map(line => {
+					const breakfastInfo = (line.children[3] as HTMLSpanElement).innerText
+					return breakfastInfo === '不含早' ? 0 : breakfastInfo.includes('1') ? 1 : 2
+				})
 
-	const stay = infoItems[6].children[1].childNodes[0].nodeValue as string
-	infoObj.ciDate = stay.split('至')[0].trim()
-	infoObj.coDate = stay.split('至')[1].trim()
+				const hasPackages = Array.from(document.querySelectorAll('.info-key')).find(span => (span as HTMLElement).innerText.includes('礼包'))
+				resvInfo.packages = hasPackages ? filterBracedText((hasPackages.nextElementSibling as HTMLElement).innerText, '【', '】') : ""
 
-	const roomRates = []
-	const roomRateNodeList = document.querySelectorAll('.detail-info-wrap .text-danger')
-	for (const rate of roomRateNodeList) {
-		roomRates.push(Number((rate as HTMLElement).innerText.slice(1))).toFixed(2)
-	}
+				resvInfo.identifier = '031709eafc20ab898d6b9e9860d31966'
+				resvInfo.agent = 'meituan'
+				resvInfo.remarks = ""
 
-	roomRates.shift()
-	infoObj.roomRates = roomRates
+				resolve(resvInfo as ReservationOTA)
+			}
+		}, 1000)
+	})
 
-	const bbf = []
-	const bbfNodeList = document.querySelectorAll('.detail-info-wrap .ml-20')
-	for (const breakfast of bbfNodeList) {
-
-		if ((breakfast as HTMLElement).innerText === '不含早') {
-			bbf.push(0)
-		} else if ((breakfast as HTMLElement).innerText === '单早') {
-			bbf.push(1)
-		} else {
-			bbf.push(2)
-		}
-	}
-	infoObj.bbf = bbf
-
-	return infoObj
+	return result
 }
 
 // util functions
@@ -270,4 +264,22 @@ function dateDiffInDays(date1: string, date2: string): number {
 
 function getElementWithAttribute(tag: string, attr: string, attrContent: string): HTMLElement | null {
 	return document.querySelector(`${tag}[${attr}="${attrContent}"]`)
+}
+
+function filterBracedText(text: string, leftBrace: string, rightBrace: string) {
+	let isCollecting = false
+	let res = ''
+
+	text.split('').forEach((token: string) => {
+		if (!isCollecting && token === leftBrace) {
+			isCollecting = true
+		} else if (isCollecting && token === rightBrace) {
+			res += ','
+			isCollecting = false
+		} else {
+			if (isCollecting) res += token
+		}
+	})
+
+	return res.split(',').slice(0, -1).join(',')
 }

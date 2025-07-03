@@ -4,7 +4,7 @@ export const defaultAgentSrc = [
     { agent: 'jielv', name: '深圳捷旅', domain: 'ebooking.jladmin.cn', urlKeyword: 'print' },
     { agent: 'kingsley', name: '广州奇利', domain: 'ql-gz.com/ebooking', urlKeyword: 'THotelOrderformShowDpAct' },
     { agent: 'ctrip', name: '携程酒店', domain: 'ebooking.ctrip.com', urlKeyword: 'print' },
-    // { agent: 'meituan', name: '美团酒店', domain: 'eb.meituan.com', urlKeyword: 'print' },
+    { agent: 'meituan', name: '美团酒店', domain: 'eb.meituan.com', urlKeyword: 'print' },
     // { agent: 'fliggy', name: '飞猪旅行', domain: 'hotel.fliggy.com', urlKeyword: 'print' },
     { agent: 'email', name: 'FedEx 邮件', domain: 'mail.qiye.163.com',urlKeyword: 'readhtml' }
 ]
