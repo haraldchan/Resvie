@@ -4,10 +4,11 @@ import { ReservationOTA } from '@/models/models'
 type Props = {
 	otaInfo: Accessor<ReservationOTA | null>
 	setOtaInfo: Setter<ReservationOTA | null>
+	parsePage: () => void
 	copyToClipboard: (param: string) => void
 }
 
-export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboard }: Props) {
+export default function ReservationFormOTA({ otaInfo, setOtaInfo, parsePage, copyToClipboard }: Props) {
 	function handleFormFormating(e: Event) {
 		e.preventDefault()
 		const form = e.target as HTMLFormElement
@@ -150,6 +151,13 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, copyToClipboar
 					/>
 				</label>
 			</div>
+			<button
+				class='form-button'
+				style='right: 177px; width: 100px'
+				onclick={parsePage}
+			>
+				刷 新
+			</button>
 			<button
 				class='form-button'
 				type='submit'
