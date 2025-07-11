@@ -71,7 +71,7 @@ export default function App() {
 
 	async function getInfoOTA(curAgent: string) {
 		try {
-			let res = await parserMap.get(curAgent)?.() as ReservationOTA
+			let res = (await parserMap.get(curAgent)?.()) as ReservationOTA
 
 			if (!res) {
 				const parsed = await parseReservationByDeepSeek(curAgent)
@@ -79,7 +79,7 @@ export default function App() {
 					return parsed.data as ReservationOTA
 				} else {
 					setModalState('error')
-					setError(parsed.data)
+					setError(parsed.data === 'No API' ? '订单获取失败; 未设置 API' : parsed.data)
 					return null
 				}
 			} else {
@@ -93,7 +93,7 @@ export default function App() {
 				return parsed.data as ReservationOTA
 			} else {
 				setModalState('error')
-				setError(parsed.data)
+				setError(parsed.data === 'No API' ? '订单获取失败; 未设置 API' : parsed.data)
 				return null
 			}
 		} finally {
@@ -116,7 +116,7 @@ export default function App() {
 				return parsed.data as ReservationFedex
 			} else {
 				setModalState('error')
-				setError(parsed.data)
+				setError(parsed.data === 'No API' ? '订单获取失败; 未设置 API' : parsed.data)
 				return null
 			}
 		} finally {
@@ -126,7 +126,7 @@ export default function App() {
 		}
 	}
 
-	onMount(async () => {
+	async function parsePage() {
 		const curAgent = await validatePage()
 		if (!curAgent) return
 
@@ -152,13 +152,12 @@ export default function App() {
 			const res = await getInfoFedex()
 			setFedexInfo(res)
 			setOtaInfo(null)
-			console.log(res)
 			await copyToClipboard(JSON.stringify(res))
 		} else {
 			if (curAgent !== 'jielv' && curAgent !== 'kingsley') {
-				await new Promise((r) => setTimeout(r, 2500))
+				await new Promise((r) => setTimeout(r, 2000))
 			}
-			
+
 			if (window.onafterprint === null) {
 				const res = await getInfoOTA(curAgent)
 				setOtaInfo(res)
@@ -167,7 +166,9 @@ export default function App() {
 				await copyToClipboard(JSON.stringify(res))
 			}
 		}
-	})
+	}
+
+	onMount(parsePage)
 
 	return (
 		<div
@@ -197,6 +198,7 @@ export default function App() {
 				<ReservationFormOTA
 					otaInfo={otaInfo}
 					setOtaInfo={setOtaInfo}
+					parsePage={parsePage}
 					copyToClipboard={copyToClipboard}
 				/>
 			</Show>
