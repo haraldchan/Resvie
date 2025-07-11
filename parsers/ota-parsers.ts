@@ -206,12 +206,12 @@ function ctripBusiness(): ReservationOTA {
 
 parserMap.set('meituan', Meituan)
 async function Meituan(): Promise<ReservationOTA> {
-	(document.querySelector('.btn-text') as HTMLSpanElement).click()
+	(document.querySelector('.btn-text') as HTMLSpanElement)?.click()
 	
 	const result = new Promise<ReservationOTA>(resolve => {
-		const nameField = (document.querySelector('.btn-text') as HTMLSpanElement).innerText
+		const nameField = document.querySelector('.guest-name') as HTMLSpanElement
 		const loop = setInterval(() => {
-			if (!nameField.includes('*')) {
+			if (!nameField.innerText.includes('*')) {
 				clearInterval(loop)
 				const resvInfo: Record<string, any> = {}
 				const contents = Array.from(document.querySelectorAll('.info-content')) as HTMLElement[]
