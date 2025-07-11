@@ -22,7 +22,7 @@ export default function Options() {
 					/>{' '}
 					<span>
 						<p>Resvie</p>
-						<p>2.0.3</p>
+						<p>2.0.7</p>
 					</span>
 				</header>
 				<OptionList
