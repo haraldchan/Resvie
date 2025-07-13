@@ -22,7 +22,7 @@ export default function Options() {
 					/>{' '}
 					<span>
 						<p>Resvie</p>
-						<p>2.0.7</p>
+						<p>{import.meta.env.WXT_APP_VERSION}</p>
 					</span>
 				</header>
 				<OptionList
