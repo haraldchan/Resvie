@@ -16,22 +16,22 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, parsePage, cop
 
 		const updatedResvInfo = otaInfo() as ReservationOTA
 		for (const [key, value] of formData) {
-			if (key === 'bbf' || key === 'roomRates') {
+			if (key === 'roomRates') {
 				updatedResvInfo[key] = value
 					.toString()
 					.split(',')
 					.map((r) => Number(r))
 			} else if (key === 'guestNames') {
 				updatedResvInfo[key] = value.toString().split(',')
-			} else if (key === 'roomQty') {
-				updatedResvInfo[key] === Number(value.toString())
+			} else if (key === 'roomQty' || key === 'bbf') {
+				updatedResvInfo[key] = Number(value.toString())
 			} else {
 				switch (key) {
 					case 'orderId':
 					case 'ciDate':
 					case 'coDate':
 					case 'remarks':
-					case 'roomType':
+					case 'roomType': 
 						updatedResvInfo[key] = value.toString()
 				}
 			}
@@ -40,8 +40,9 @@ export default function ReservationFormOTA({ otaInfo, setOtaInfo, parsePage, cop
 		const ciDate = new Date(updatedResvInfo.ciDate)
 		const coDate = new Date(updatedResvInfo.coDate)
 		const dateDiffInDays = (coDate.getTime() - ciDate.getTime()) / (1000 * 60 * 60 * 24)
-		updatedResvInfo.roomRates = Array(dateDiffInDays).fill(otaInfo()?.roomRates[0])
-		updatedResvInfo.bbf = Array(dateDiffInDays).fill(otaInfo()?.bbf[0])
+		if (dateDiffInDays > updatedResvInfo.roomRates.length) {
+			updatedResvInfo.roomRates = Array(dateDiffInDays).fill(otaInfo()?.roomRates[0])
+		}
 		
 		console.log(updatedResvInfo)
 		setOtaInfo(null)

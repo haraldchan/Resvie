@@ -32,7 +32,7 @@ export type ReservationOTA = {
 	ciDate: string
 	coDate: string
 	roomQty: string | number
-	bbf: string | number[]
+	bbf: number,
 	remarks: string
 }
 

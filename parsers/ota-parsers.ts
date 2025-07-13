@@ -28,12 +28,11 @@ function Kingsley(): ReservationOTA {
 	}
 
 	const orderIdText = (document.querySelectorAll('.square426')[1] as HTMLElement).innerText
-	const bbfCount = orderIdText.includes('不含早') ? 0 : orderIdText.includes('单早') ? 1 : 2
+	const bbf = orderIdText.includes('不含早') ? 0 : orderIdText.includes('单早') ? 1 : 2
 
 	const stayTable = document.querySelectorAll('table')[2].children[0]
 	const ciDate = stayTable.children[1].children[0].textContent!.trim().replace(/[^0-9]/gi, '-').slice(0, 10)
 	const coDate = stayTable.children[stayTable.childElementCount - 1].children[1].textContent!.trim().replace(/[^0-9]/gi, '-').slice(0, 10)
-	const bbf = Array(dateDiffInDays(ciDate, coDate)).fill(bbfCount)
 	const roomQty = Number(stayTable.children[1].children[2].textContent)
 
 	const rateInfoText = document.querySelectorAll('table')[3].children[0].children[0].children[0].textContent!.split('：')[2].split('，房价请向客人保密')[0]
@@ -84,14 +83,18 @@ function Jielv(): ReservationOTA {
 	const tabbles = document.querySelectorAll('.tabble-body')
 	const roomQty = parseInt((tabbles[0].children[4] as HTMLElement).innerText)
 	const roomRates = []
-	const bbf = []
+
+	const bbfCase: Record<string, 0 | 1 | 2> = {
+		"不含早": 0,
+		"单早": 1,
+		"双早": 2
+	}
+
+	let bbf = bbfCase[(tabbles[0].children[1] as HTMLElement).innerText.split(' ')[1]]
 	for (const tabble of tabbles) {
 		roomRates.push(Number((tabble.children[3] as HTMLElement).innerText.slice(0, -2)))
-		const breakfast = (tabble.children[1] as HTMLElement).innerText.split(' ')[1]
-		bbf.push(breakfast === '不含早' ? 0 : breakfast === '单早' ? 1 : 2)
 	}
 	roomRates.pop()
-	bbf.pop()
 
 	return {
 		identifier: '031709eafc20ab898d6b9e9860d31966',
@@ -150,7 +153,7 @@ function ctripOta(): ReservationOTA {
 
 	const rateFieldText = getElementWithAttribute('span', attr, ctripAttributedFields.roomRates)!.innerText.split('\n')
 	const roomRates = rateFieldText.filter(field => field != '').map(field => Number(field.split(' ')[2].replace('CNY', '')))
-	const bbf = rateFieldText.filter(field => field != '').map(field => field.includes('不含餐') ? 0 : Number(field.split(' ')[3]))
+	const bbf = rateFieldText[0].includes('不含餐') ? 0 : rateFieldText[0].includes('1 早餐') ? 1 : 2 
 
 	return {
 		identifier: '031709eafc20ab898d6b9e9860d31966',
@@ -185,7 +188,7 @@ function ctripBusiness(): ReservationOTA {
 	const rateFieldText = getElementWithAttribute('span', attr, ctripAttributedFields.roomRates)!.innerText
 	const roomRate = Number(rateFieldText.split('RMB')[1].split('含')[0])
 	const roomRates = Array(dateDiffInDays(ciDate, coDate)).fill(roomRate)
-	const bbf = Array(dateDiffInDays(ciDate, coDate)).fill(rateFieldText.includes('含双早') ? 2 : 1)
+	const bbf = rateFieldText.includes('含双早') ? 2 : 1
 
 	return {
 		identifier: '031709eafc20ab898d6b9e9860d31966',
@@ -207,7 +210,7 @@ function ctripBusiness(): ReservationOTA {
 parserMap.set('meituan', Meituan)
 async function Meituan(): Promise<ReservationOTA> {
 	(document.querySelector('.btn-text') as HTMLSpanElement)?.click()
-	
+
 	const result = new Promise<ReservationOTA>(resolve => {
 		const nameField = document.querySelector('.guest-name') as HTMLSpanElement
 		const loop = setInterval(() => {
@@ -219,7 +222,7 @@ async function Meituan(): Promise<ReservationOTA> {
 				resvInfo.orderId = contents[0].innerText.split(' ')[0]
 				resvInfo.guestNames = contents[3].innerText.includes('、') ? contents[3].innerText.split('、') : [contents[3].innerText]
 				resvInfo.roomType = contents[5].innerText.split('房')[0] + '房'
-				resvInfo.roomQty = parseInt(contents[5].innerText.split(' ')[1].replace('间', ''))
+				resvInfo.roomQty = parseInt(contents[5].innerText.split(' ').at(-1)!.replace('间', ''))
 				const [ciDate, _, coDate] = contents[6].innerText.split(' ')
 				resvInfo.ciDate = ciDate
 				resvInfo.coDate = coDate
@@ -227,10 +230,12 @@ async function Meituan(): Promise<ReservationOTA> {
 
 				const rateInfo = Array.from(contents[9].children) as HTMLElement[]
 				resvInfo.roomRates = rateInfo.map(line => parseFloat((line.children[0] as HTMLSpanElement).innerText.replace('￥', '')))
-				resvInfo.bbf = rateInfo.map(line => {
-					const breakfastInfo = (line.children[3] as HTMLSpanElement).innerText
-					return breakfastInfo === '不含早' ? 0 : breakfastInfo.includes('1') ? 1 : 2
-				})
+				// resvInfo.bbf = rateInfo.map(line => {
+				// 	const breakfastInfo = (line.children[3] as HTMLSpanElement).innerText
+				// 	return breakfastInfo === '不含早' ? 0 : breakfastInfo.includes('1') ? 1 : 2
+				// })
+				const breakfastInfo = (rateInfo[0].children[3] as HTMLSpanElement).innerText
+				resvInfo.bbf = breakfastInfo === '不含早' ? 0 : breakfastInfo.includes('1') ? 1 : 2
 
 				const hasPackages = Array.from(document.querySelectorAll('.info-key')).find(span => (span as HTMLElement).innerText.includes('礼包'))
 				resvInfo.packages = hasPackages ? filterBracedText((hasPackages.nextElementSibling as HTMLElement).innerText, '【', '】') : ""
