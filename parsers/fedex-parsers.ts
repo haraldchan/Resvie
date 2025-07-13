@@ -17,7 +17,8 @@ export default function FedexMail(): ReservationFedex {
     const roomQty = Number(newResv.at(-6)!.innerText)
 
     const crewInfo = document.querySelector('div .content') as HTMLElement
-    const crewNames = getCrewNames(crewInfo.innerText.split('\n')[0])
+    const idRegex = /\(\d+\)/
+    const crewNames = getCrewNames(crewInfo.innerText.split('\n').find(line => idRegex.test(line))!)
     const tripNum = crewInfo.parentElement!.nextElementSibling!.textContent!.split(' ')
     const tracking = Array.from(document.querySelectorAll('p')!).find(p => p.innerText.includes('Tracking'))!.innerText.split(' ').at(-1) as string
 
