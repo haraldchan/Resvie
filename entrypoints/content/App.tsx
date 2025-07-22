@@ -59,7 +59,18 @@ export default function App() {
 	async function validatePage() {
 		const agentSrc: Agents = (await storage.getItem('local:agentSrc')) ?? defaultAgentSrc
 		const url = window.location.href
-		const curAgent = agentSrc.find((agent) => url.includes(agent.domain) && url.toLowerCase().includes(agent.urlKeyword.toLowerCase()))?.agent
+		const curAgent = agentSrc.find((agent) => {
+			// url.includes(agent.domain) && url.toLowerCase().includes(agent.keyword.url.toLowerCase())
+			if (!url.includes(agent.domain)) return 
+
+			if (!url.toLowerCase().includes(agent.keyword.url.toLowerCase())) return
+
+			if (agent.keyword.hasOwnProperty('document') && agent.keyword.document !== undefined) {
+				if (!document.body.innerText.includes(agent.keyword.document)) return
+			}
+
+			return true
+		})?.agent
 		if (curAgent === undefined) {
 			setIsReadablePage(false)
 			return
@@ -148,7 +159,7 @@ export default function App() {
 
 		setModalState('parsing')
 
-		if (curAgent === 'email') {
+		if (curAgent === 'fedex') {
 			const res = await getInfoFedex()
 			setFedexInfo(res)
 			setOtaInfo(null)
