@@ -19,7 +19,7 @@ export default function PromptOptions() {
 					name: item.name,
 					prompt: {
 						system: updatedSystemPrompt,
-						user: updatedUserPrompt
+						user: updatedUserPrompt,
 					},
 				}
 			} else {
@@ -33,13 +33,13 @@ export default function PromptOptions() {
 	}
 
 	onMount(async () => {
-		setPrompts((await storage.getItem('local:prompts') ?? defaultPrompts))
+		setPrompts((await storage.getItem('local:prompts')) ?? defaultPrompts)
 	})
 
 	return (
 		<div class='options-details-section'>
 			<header class='options-header'>
-				<span>平台名称</span>
+				<div style='width:100px'>平台名称</div>
 			</header>
 			<ul class='options-items'>
 				{prompts().map((item) => {
@@ -79,7 +79,10 @@ export default function PromptOptions() {
 								</Show>
 								<Show when={curEditingAgent() === item.agent}>
 									<div class='prompt-setting editing'>
-										<button class='save-button' onclick={() => setCurEditingAgent('')}>
+										<button
+											class='save-button'
+											onclick={() => setCurEditingAgent('')}
+										>
 											<svg
 												xmlns='http://www.w3.org/2000/svg'
 												viewBox='0 0 512 512'
@@ -93,7 +96,10 @@ export default function PromptOptions() {
 												></path>
 											</svg>
 										</button>
-										<button class='save-button' onclick={handlePromptUpdate}>
+										<button
+											class='save-button'
+											onclick={handlePromptUpdate}
+										>
 											<svg
 												xmlns='http://www.w3.org/2000/svg'
 												viewBox='0 0 20 20'

@@ -5,16 +5,16 @@ export default function ModelOptions() {
 
 	function handleApiUpdate(e: Event) {
 		const input = e.target as HTMLInputElement
-		const updated = {...deepseek(), key: input.value}
+		const updated = { ...deepseek(), key: input.value }
 
 		setDeepseek(updated)
 		storage.setItem('local:deepseek', updated)
 	}
-	
+
 	function handleModelUpdate(e: Event) {
 		const select = e.target as HTMLSelectElement
-		const updated = {...deepseek(), model: select.value}
-		
+		const updated = { ...deepseek(), model: select.value }
+
 		setDeepseek(updated)
 		storage.setItem('local:deepseek', updated)
 	}
@@ -24,10 +24,10 @@ export default function ModelOptions() {
 	})
 
 	return (
-		<div class="options-details-section">
+		<div class='options-details-section'>
 			<header class='options-header'>
-				<span>通用模型</span>
-				<span>API 密钥</span>
+				<div style='width:100px'>通用模型</div>
+				<div style='margin-left:40px; width: 20vw'>API 密钥</div>
 			</header>
 			<ul class='options-items'>
 				<li class='list-item'>
@@ -35,7 +35,7 @@ export default function ModelOptions() {
 						src='/deepseek-color-VhubYub3.png'
 						alt='DeepSeek'
 					/>
-					<div style={{width: '130px'}}>DeepSeek</div>
+					<div style='width:100px'>DeepSeek</div>
 					<div>
 						<input
 							type='url'
@@ -43,9 +43,13 @@ export default function ModelOptions() {
 							value={deepseek().key}
 							onchange={handleApiUpdate}
 						/>
-						<select name="model-select" id="model-select" onchange={handleModelUpdate}>
-							<option value="deepseek-chat">chat</option>
-							<option value="deepseek-reasoner">reasoner</option>
+						<select
+							name='model-select'
+							id='model-select'
+							onchange={handleModelUpdate}
+						>
+							<option value='deepseek-chat'>chat</option>
+							<option value='deepseek-reasoner'>reasoner</option>
 						</select>
 					</div>
 				</li>

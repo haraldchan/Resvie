@@ -1,4 +1,4 @@
-import { Agents } from '@/models/models'
+import { Agent, Agents } from '@/models/models'
 import { defaultAgentSrc, defaultOtaSystemPrompt, defaultOtaUserPrompt } from '@/models/defaults'
 import { prompts, setPrompts } from './prompt-options'
 
@@ -13,7 +13,11 @@ export default function OtaOptions() {
 				if (input.type === 'url') {
 					return { ...item, domain: input.value }
 				} else {
-					return { ...item, urlKeyword: input.value }
+					if (input.id.includes('url')) {
+						return { ...item, keyword: { url: input.value, document: item.keyword.document } }
+					} else {
+						return { ...item, keyword: { url: item.keyword.url , document: input.value } }
+					}
 				}
 			} else {
 				return item
@@ -22,33 +26,37 @@ export default function OtaOptions() {
 
 		setAgentSrc(updated)
 		storage.setItem('local:agentSrc', updated)
-
 	}
 
 	async function handleAddCustomAgent(isSave: boolean) {
 		if (isSave) {
 			const name = document.getElementById('new-agent-name') as HTMLInputElement
 			const domain = document.getElementById('new-agent-domain') as HTMLInputElement
-			const urlKeyword = document.getElementById('new-agent-urlKeyword') as HTMLInputElement
-			if (name.value === '' || domain.value === '' || urlKeyword.value === '') {
+			const kwUrl = document.getElementById('new-agent-keyword-url') as HTMLInputElement
+			const kwDoc = document.getElementById('new-agent-keyword-document') as HTMLInputElement
+			if (name.value === '' || domain.value === '' || kwUrl.value === '') {
 				setAddAgent(false)
 				return
 			}
 
-			const newAgent = {
-				agent: 'custom-' + domain.value.split('.')[1],
+			const newAgent: Agent = {
+				agent: 'custom-' + name.value,
 				domain: domain.value,
 				name: name.value,
-				urlKeyword: urlKeyword.value,
+				keyword: {
+					url: kwUrl.value,
+				},
 			}
+
+			if (kwDoc.value !== '') newAgent.keyword.document = kwDoc.value
 
 			const newPrompt = {
 				agent: newAgent.agent,
 				name: newAgent.name,
 				prompt: {
 					system: defaultOtaSystemPrompt,
-					user: defaultOtaUserPrompt
-				}
+					user: defaultOtaUserPrompt,
+				},
 			}
 
 			setAgentSrc([...agentSrc(), newAgent])
@@ -56,18 +64,18 @@ export default function OtaOptions() {
 			storage.setItem('local:agentSrc', agentSrc())
 			storage.setItem('local:prompts', prompts())
 		}
-		
+
 		setAddAgent(false)
 	}
-	
+
 	async function handleCustomAgentDeletion(name: string) {
-		const updatedAgentSrc = agentSrc().filter(agent => agent.name !== name)
-		const updatedPrompts = prompts().filter(agent => agent.name !== name)
-		
+		const updatedAgentSrc = agentSrc().filter((agent) => agent.name !== name)
+		const updatedPrompts = prompts().filter((agent) => agent.name !== name)
+
 		setAgentSrc(updatedAgentSrc)
 		setPrompts(updatedPrompts)
 		storage.setItem('local:agentSrc', agentSrc())
-		storage.setItem('local:prompts', prompts())		
+		storage.setItem('local:prompts', prompts())
 	}
 
 	onMount(async () => {
@@ -78,9 +86,10 @@ export default function OtaOptions() {
 		<>
 			<div class='options-details-section'>
 				<header class='options-header'>
-					<span>平台名称</span>
-					<span style='width: 21vw'>网站地址</span>
-					<span>URL 关键字</span>
+					<div style='width:100px'>平台名称</div>
+					<div style='margin-left:40px; width: 20vw'>网站地址</div>
+					<div style='width: 10vw'>URL 关键字</div>
+					<div style='margin-left: 2vw; width: 10vw'>网页关键字</div>
 				</header>
 				<ul class='options-items'>
 					{agentSrc()
@@ -102,7 +111,18 @@ export default function OtaOptions() {
 										<input
 											type='text'
 											name={item.name}
-											value={item.urlKeyword}
+											id={item.name + '-kw-url'}
+											value={item.keyword.url}
+											style='margin-left:10px; width: 10vw'
+											onchange={handleAgentSourcesUpdate}
+										/>
+									</div>
+									<div>
+										<input
+											type='text'
+											name={item.name}
+											id={item.name + '-kw-document'}
+											value={item.keyword.document ?? ''}
 											style='margin-left:10px; width: 10vw'
 											onchange={handleAgentSourcesUpdate}
 										/>
@@ -117,9 +137,10 @@ export default function OtaOptions() {
 			<p>此部分将由大模型解析</p>
 			<div class='options-details-section'>
 				<header class='options-header'>
-					<span>平台名称</span>
-					<span style='width: 21vw'>网站地址</span>
-					<span>URL 关键字</span>
+					<div style='width:100px'>平台名称</div>
+					<div style='margin-left:40px; width: 20vw'>网站地址</div>
+					<div style='width: 10vw'>URL 关键字</div>
+					<div style='margin-left: 2vw; width: 10vw'>网页关键字</div>
 				</header>
 				<ul class='options-items'>
 					{agentSrc()
@@ -141,7 +162,19 @@ export default function OtaOptions() {
 										<input
 											type='text'
 											name={item.name}
-											value={item.urlKeyword}
+											id={item.name + '-kw-url'}
+											value={item.keyword.url}
+											style='margin-left:10px; width: 10vw'
+											onchange={handleAgentSourcesUpdate}
+										/>
+									</div>
+									<div>
+										<input
+											type='text'
+											name={item.name}
+											id={item.name + '-kw-document'}
+											value={item.keyword.document ?? ''}
+											placeholder='可选'
 											style='margin-left:10px; width: 10vw'
 											onchange={handleAgentSourcesUpdate}
 										/>
@@ -172,7 +205,7 @@ export default function OtaOptions() {
 								style={{ 'margin-left': '0px' }}
 								onclick={() => setAddAgent(true)}
 							>
-								添 加
+								添加
 							</button>
 						</Show>
 						<Show when={addAgent()}>
@@ -196,8 +229,16 @@ export default function OtaOptions() {
 								<input
 									type='text'
 									style='margin-left:10px; width: 10vw'
-									placeholder='订单页面关键字'
-									id='new-agent-urlKeyword'
+									placeholder='URL 关键字'
+									id='new-agent-keyword-url'
+								/>
+							</div>
+							<div>
+								<input
+									type='text'
+									style='margin-left:10px; width: 10vw'
+									placeholder='网页关键字 (可选)'
+									id='new-agent-keyword-document'
 								/>
 							</div>
 							<button
