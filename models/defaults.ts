@@ -1,12 +1,12 @@
 import { Prompts } from './models'
 
 export const defaultAgentSrc = [
-    { agent: 'jielv', name: '深圳捷旅', domain: 'ebooking.jladmin.cn', urlKeyword: 'print' },
-    { agent: 'kingsley', name: '广州奇利', domain: 'ql-gz.com/ebooking', urlKeyword: 'THotelOrderformShowDpAct' },
-    { agent: 'ctrip', name: '携程酒店', domain: 'ebooking.ctrip.com', urlKeyword: 'print' },
-    { agent: 'meituan', name: '美团酒店', domain: 'eb.meituan.com', urlKeyword: 'print' },
+    { agent: 'jielv', name: '深圳捷旅', domain: 'ebooking.jladmin.cn', keyword: { url: 'print' } },
+    { agent: 'kingsley', name: '广州奇利', domain: 'ql-gz.com/ebooking', keyword: { url: 'THotelOrderformShowDpAct' } },
+    { agent: 'ctrip', name: '携程酒店', domain: 'ebooking.ctrip.com', keyword: { url: 'print' } },
+    { agent: 'meituan', name: '美团酒店', domain: 'eb.meituan.com', keyword: { url: 'print' } },
     // { agent: 'fliggy', name: '飞猪旅行', domain: 'hotel.fliggy.com', urlKeyword: 'print' },
-    { agent: 'email', name: 'FedEx 邮件', domain: 'mail.qiye.163.com',urlKeyword: 'readhtml' }
+    { agent: 'fedex', name: 'FedEx 邮件', domain: 'mail.qiye.163.com', keyword: { url: 'readhtml', document: 'FedEx Express' } }
 ]
 
 export const defaultFedexSystemPrompt = `<role>
@@ -79,8 +79,8 @@ export const defaultPrompts: Prompts = defaultAgentSrc.map(agent => {
     return {
         agent: agent.agent,
         name: agent.name,
-        prompt: agent.name === 'FedEx 邮件' 
-            ? { system: defaultFedexSystemPrompt, user: defaultFedexUserPrompt } 
-            : { system: defaultOtaSystemPrompt, user: defaultFedexUserPrompt } 
+        prompt: agent.name === 'FedEx 邮件'
+            ? { system: defaultFedexSystemPrompt, user: defaultFedexUserPrompt }
+            : { system: defaultOtaSystemPrompt, user: defaultFedexUserPrompt }
     }
 })

@@ -1,9 +1,14 @@
-export type Agents = {
+export type Agent = {
 	agent: string
 	name: string
-	domain: string,
-	urlKeyword: string
-}[]
+	domain: string
+	keyword: {
+		url: string
+		document?: string
+	}
+}
+
+export type Agents = Agent[]
 
 export type Prompts = {
 	agent: string
