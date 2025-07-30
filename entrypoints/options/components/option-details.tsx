@@ -10,13 +10,13 @@ type Props = {
 	descriptions: Map<Options, string>
 }
 
-const optionPanels: Record<Options, ValidComponent> = {
-	'大模型设置': ModelOptions,
-	'OTA 网址配置': OtaOptions,
-	'提示词设置': PromptOptions,
-}
-
 export default function OptionDetails({ selectedOption, descriptions }: Props) {
+	const optionPanels: Record<Options, ValidComponent> = {
+		'大模型设置': ModelOptions,
+		'OTA 网址配置': OtaOptions,
+		'提示词设置': PromptOptions,
+	}
+
 	const optionDescription = () => descriptions.get(selectedOption())
 
 	return (
