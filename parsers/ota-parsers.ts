@@ -230,10 +230,7 @@ async function Meituan(): Promise<ReservationOTA> {
 
 				const rateInfo = Array.from(contents[9].children) as HTMLElement[]
 				resvInfo.roomRates = rateInfo.map(line => parseFloat((line.children[0] as HTMLSpanElement).innerText.replace('￥', '')))
-				// resvInfo.bbf = rateInfo.map(line => {
-				// 	const breakfastInfo = (line.children[3] as HTMLSpanElement).innerText
-				// 	return breakfastInfo === '不含早' ? 0 : breakfastInfo.includes('1') ? 1 : 2
-				// })
+				
 				const breakfastInfo = (rateInfo[0].children[3] as HTMLSpanElement).innerText
 				resvInfo.bbf = breakfastInfo === '不含早' ? 0 : breakfastInfo.includes('1') ? 1 : 2
 
