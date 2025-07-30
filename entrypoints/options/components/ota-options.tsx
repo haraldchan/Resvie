@@ -1,6 +1,7 @@
 import { Agent, Agents } from '@/models/models'
 import { defaultAgentSrc, defaultOtaSystemPrompt, defaultOtaUserPrompt } from '@/models/defaults'
 import { prompts, setPrompts } from './prompt-options'
+import { CancelIcon, OkIcon, DeleteIcon } from '../svg-icons/button-icons'
 
 export default function OtaOptions() {
 	const [agentSrc, setAgentSrc] = createSignal<Agents>(defaultAgentSrc)
@@ -16,7 +17,7 @@ export default function OtaOptions() {
 					if (input.id.includes('url')) {
 						return { ...item, keyword: { url: input.value, document: item.keyword.document } }
 					} else {
-						return { ...item, keyword: { url: item.keyword.url , document: input.value } }
+						return { ...item, keyword: { url: item.keyword.url, document: input.value } }
 					}
 				}
 			} else {
@@ -183,17 +184,7 @@ export default function OtaOptions() {
 										class='save-button'
 										onclick={() => handleCustomAgentDeletion(item.name)}
 									>
-										<svg
-											xmlns='http://www.w3.org/2000/svg'
-											viewBox='0 0 32 32'
-											width='20px'
-											height='20px'
-										>
-											<path
-												fill='currentColor'
-												d='M16 3C8.832 3 3 8.832 3 16s5.832 13 13 13s13-5.832 13-13S23.168 3 16 3m0 2c6.087 0 11 4.913 11 11s-4.913 11-11 11S5 22.087 5 16S9.913 5 16 5m-3.78 5.78l-1.44 1.44L14.564 16l-3.782 3.78l1.44 1.44L16 17.437l3.78 3.78l1.44-1.437L17.437 16l3.78-3.78l-1.437-1.44L16 14.564l-3.78-3.782z'
-											></path>
-										</svg>
+										<DeleteIcon fill='gray' />
 									</button>
 								</li>
 							)
@@ -245,34 +236,13 @@ export default function OtaOptions() {
 								class='save-button'
 								onclick={() => handleAddCustomAgent(false)}
 							>
-								<svg
-									xmlns='http://www.w3.org/2000/svg'
-									viewBox='0 0 512 512'
-									width='20px'
-									height='20px'
-								>
-									<path
-										fill='red'
-										fill-rule='evenodd'
-										d='M420.48 121.813L390.187 91.52L256 225.92L121.813 91.52L91.52 121.813L225.92 256L91.52 390.187l30.293 30.293L256 286.08l134.187 134.4l30.293-30.293L286.08 256z'
-									></path>
-								</svg>
+								<CancelIcon />
 							</button>
 							<button
 								class='save-button'
 								onclick={() => handleAddCustomAgent(true)}
 							>
-								<svg
-									xmlns='http://www.w3.org/2000/svg'
-									viewBox='0 0 20 20'
-									width='25px'
-									height='25px'
-								>
-									<path
-										fill='green'
-										d='m15.3 5.3l-6.8 6.8l-2.8-2.8l-1.4 1.4l4.2 4.2l8.2-8.2z'
-									></path>
-								</svg>
+								<OkIcon />
 							</button>
 						</Show>
 					</li>
