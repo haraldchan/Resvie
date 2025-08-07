@@ -2,10 +2,10 @@ import OptionList from './components/options-list'
 import OptionDetails from './components/option-details'
 import { createSignal } from 'solid-js'
 
-export type Options = '大模型设置' | 'OTA 网址配置' | '提示词设置'
+export type Options = 'OTA 网址配置' | '大模型设置' | '提示词设置'
 
 export default function Options() {
-	const [selectedOption, setSelectedOption] = createSignal<Options>('大模型设置')
+	const [selectedOption, setSelectedOption] = createSignal<Options>('OTA 网址配置')
 	const descriptions = new Map<Options, string>([
 		['大模型设置', '设置 API 密钥及模型'],
 		['OTA 网址配置', '配置平台网址以读取订单信息'],
