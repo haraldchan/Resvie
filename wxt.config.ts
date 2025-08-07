@@ -13,6 +13,8 @@ export default defineConfig({
                 resources: ['/*.png']
             }
         ],
+        action: {},
+        page_action: {}
     }),
     webExt: {
         firefoxProfile: '.wxt/firefox-profile',
